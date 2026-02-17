@@ -51,14 +51,11 @@ public boolean terminarRonda() {
         return Integer.compare(numero, o.numero);
     }
 
-    public Ronda(int numero, String titulo, List<Partido<T>> partidos, boolean esFinal, boolean terminada,
-            List<T> ganadores) {
+    public Ronda(int numero, String titulo, List<Partido<T>> partidos, boolean esFinal) {
         this.numero = numero;
         this.titulo = titulo;
         this.partidos = partidos;
         this.esFinal = esFinal;
-        this.terminada = terminada;
-        this.ganadores = ganadores;
     }
 
 

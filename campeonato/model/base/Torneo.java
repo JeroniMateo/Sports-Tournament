@@ -1,120 +1,95 @@
 package campeonato.model.base;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
+/**
+ * Representa la entidad global del torneo.
+ * Mantiene la lista de inscritos y el histórico de rondas generadas.
+ */
 public class Torneo<T extends ParticipanteAbstracto> {
 
-    private List<T> participantes;
-    private SortedSet<Ronda<T>> rondas;
-
-    public Torneo() {
-        rondas = new TreeSet<>();
-    }
+    private final List<T> participantes;
+    private final SortedSet<Ronda<T>> rondas;
 
     public Torneo(List<T> participantes) {
-        this();
-        this.participantes = participantes;
+        this.participantes = (participantes != null) ? participantes : Collections.emptyList();
+        this.rondas = new TreeSet<>();
     }
 
-    private void mostrarDatosRonda(Ronda<T> ronda) {
-        System.out.println("Ronda: Nº %d - %s".formatted(ronda.getNumero(), ronda.getTitulo().toUpperCase()));
-        System.out.println("================================");
-        System.out.println();
-        System.out.println("-------Partidos:-------");
+    /**
+     * Devuelve el campeón del torneo si la gran final ha terminado.
+     */
+    public Optional<T> getCampeon() {
+        if (!rondas.isEmpty()) {
+            Ronda<T> ultima = rondas.last();
+            if (ultima.isEsFinal() && ultima.isTerminada() && !ultima.getGanadores().isEmpty()) {
+                return Optional.of(ultima.getGanadores().get(0));
+            }
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Genera una representación visual de los datos de una ronda.
+     * He movido la lógica de System.out a un StringBuilder para que sea más versátil.
+     */
+    public String obtenerResumenRonda(Ronda<T> ronda) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n=== RONDA Nº %d: %s ===\n".formatted(ronda.getNumero(), ronda.getTitulo().toUpperCase()));
+        
         for (Partido<T> partido : ronda.getPartidos()) {
-            System.out.println("J1: %s - J2: %s".formatted(partido.getParticipante1().getNombre(), partido.getParticipante2().getNombre()));
-            if (partido.getGanador() != null) {
-                System.out.println("Ganador: %s".formatted(partido.getGanador().getNombre()));
+            sb.append("  [PARTIDO] %s vs %s".formatted(
+                partido.getParticipante1().getNombre(), 
+                partido.getParticipante2().getNombre()));
+            
+            if (partido.tieneGanador()) {
+                sb.append(" -> GANADOR: %s".formatted(partido.getGanador().getNombre()));
             }
+            sb.append("\n");
+        }
+        return sb.toString();
+    }
+
+    public void mostrarUltimaRonda() {
+        if (rondas.isEmpty()) {
+            System.out.println("Torneo sin rondas iniciadas.");
+        } else {
+            System.out.println(obtenerResumenRonda(rondas.last()));
         }
     }
 
-    public void mostrarDatosUltimaRonda() {
-        if (rondas.size() > 0) {
-            mostrarDatosRonda(rondas.last());
-        }
-        else{
-            System.out.println("No hay rondas en el torneo.");
-            return;
+    public void mostrarHistoricoCompleto() {
+        if (rondas.isEmpty()) {
+            System.out.println("No hay datos históricos.");
+        } else {
+            rondas.forEach(r -> System.out.println(obtenerResumenRonda(r)));
         }
     }
 
-    public void mostrarDatosTodasLasRondas() {
-        if (rondas.size() > 0) {
-            for (Ronda<T> ronda : rondas) {
-                mostrarDatosRonda(ronda);
-            }
-        }
-        else{
-            System.out.println("No hay rondas en el torneo.");
-            return;
-        }
-    }
+    // Getters
+    public List<T> getParticipantes() { return participantes; }
+    public SortedSet<Ronda<T>> getRondas() { return rondas; }
 
-    public List<T> getParticipantes() {
-        return participantes;
-    }
-
-    public void setParticipantes(List<T> participantes) {
-        this.participantes = participantes;
-    }
-
-    public SortedSet<Ronda<T>> getRondas() {
-        return rondas;
-    }
-
-    public void setRondas(SortedSet<Ronda<T>> rondas) {
-        this.rondas = rondas;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Torneo<?> torneo)) return false;
+        return Objects.equals(participantes, torneo.participantes) && 
+               Objects.equals(rondas, torneo.rondas);
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((participantes == null) ? 0 : participantes.hashCode());
-        result = prime * result + ((rondas == null) ? 0 : rondas.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null) {
-            return false;
-        }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        Torneo other = (Torneo) obj;
-        if (participantes == null) {
-            if (other.participantes != null) {
-                return false;
-            }
-        } else if (!participantes.equals(other.participantes)) {
-            return false;
-        }
-        if (rondas == null) {
-            if (other.rondas != null) {
-                return false;
-            }
-        } else if (!rondas.equals(other.rondas)) {
-            return false;
-        }
-        return true;
-    }
-
-    public Torneo(List<T> participantes, SortedSet<Ronda<T>> rondas) {
-        this.participantes = participantes;
-        this.rondas = rondas;
+        return Objects.hash(participantes, rondas);
     }
 
     @Override
     public String toString() {
-        return "Torneo [participantes=" + participantes + ", rondas=" + rondas + "]";
+        return "Torneo con %d participantes y %d rondas jugadas.".formatted(participantes.size(), rondas.size());
     }
-
 }

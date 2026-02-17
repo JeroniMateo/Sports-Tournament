@@ -1,82 +1,61 @@
 package campeonato.model.padel;
 
 import campeonato.model.base.ParticipanteAbstracto;
+import java.util.Objects;
 
-public class ParejaPadel extends ParticipanteAbstracto{
+/**
+ * Representa una pareja de pádel. 
+ * Especialización de ParticipanteAbstracto que gestiona dos nombres individuales.
+ */
+public class ParejaPadel extends ParticipanteAbstracto {
 
-    private String nombreJugador1, nombreJugador2;
+    private final String jugador1;
+    private final String jugador2;
 
-    public ParejaPadel() {
-        super();
+    /**
+     * Constructor para parejas con nombre de equipo y jugadores definidos.
+     */
+    public ParejaPadel(String nombreEquipo, String jugador1, String jugador2) {
+        super(nombreEquipo);
+        this.jugador1 = (jugador1 == null || jugador1.isBlank()) ? "TBD" : jugador1.trim();
+        this.jugador2 = (jugador2 == null || jugador2.isBlank()) ? "TBD" : jugador2.trim();
     }
 
-    public ParejaPadel(String nombre) {
-        super(nombre);
+    /**
+     * Constructor simplificado cuando el nombre del equipo es la unión de los jugadores.
+     */
+    public ParejaPadel(String jugador1, String jugador2) {
+        this(jugador1 + "/" + jugador2, jugador1, jugador2);
     }
 
-    public ParejaPadel(String nombre, String nombreJugador1, String nombreJugador2) {
-        super(nombre);
-        this.nombreJugador1 = nombreJugador1;
-        this.nombreJugador2 = nombreJugador2;
-    }
-   
+    /**
+     * Sobrescribe getNombre para ofrecer una identidad completa.
+     * Ejemplo: "Coello/Tapia (Arturo Coello y Agustín Tapia)"
+     */
     @Override
     public String getNombre() {
-        return "%s (%s y %s)".formatted(super.getNombre(), nombreJugador1, nombreJugador2);
+        return "%s (%s y %s)".formatted(super.getNombre(), jugador1, jugador2);
     }
 
-    public String getNombreJugador1() {
-        return nombreJugador1;
-    }
+    public String getJugador1() { return jugador1; }
+    public String getJugador2() { return jugador2; }
 
-    public void setNombreJugador1(String nombreJugador1) {
-        this.nombreJugador1 = nombreJugador1;
-    }
-
-    public String getNombreJugador2() {
-        return nombreJugador2;
-    }
-
-    public void setNombreJugador2(String nombreJugador2) {
-        this.nombreJugador2 = nombreJugador2;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ParejaPadel that)) return false;
+        if (!super.equals(o)) return false;
+        return Objects.equals(jugador1, that.jugador1) && 
+               Objects.equals(jugador2, that.jugador2);
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + ((nombreJugador1 == null) ? 0 : nombreJugador1.hashCode());
-        result = prime * result + ((nombreJugador2 == null) ? 0 : nombreJugador2.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        ParejaPadel other = (ParejaPadel) obj;
-        if (nombreJugador1 == null) {
-            if (other.nombreJugador1 != null)
-                return false;
-        } else if (!nombreJugador1.equals(other.nombreJugador1))
-            return false;
-        if (nombreJugador2 == null) {
-            if (other.nombreJugador2 != null)
-                return false;
-        } else if (!nombreJugador2.equals(other.nombreJugador2))
-            return false;
-        return true;
+        return Objects.hash(super.hashCode(), jugador1, jugador2);
     }
 
     @Override
     public String toString() {
-        return "ParejaPadel [nombreJugador1=" + nombreJugador1 + ", nombreJugador2=" + nombreJugador2 + "]";
-    }   
-
-    
-    
+        return "Pareja Padel: " + getNombre();
+    }
 }

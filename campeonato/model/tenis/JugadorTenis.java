@@ -1,19 +1,30 @@
 package campeonato.model.tenis;
 
 import campeonato.model.base.ParticipanteAbstracto;
+import java.util.Objects;
 
-public class JugadorTenis extends ParticipanteAbstracto{
+/**
+ * Representa a un tenista individual.
+ * Incluye un sistema de puntuación para rankings o simulaciones basadas en nivel.
+ */
+public class JugadorTenis extends ParticipanteAbstracto {
 
     private int puntosTotales;
 
-    public JugadorTenis() {
-        super();
-        this.puntosTotales = 0;
-    }
-
+    /**
+     * Constructor estándar para nuevos jugadores.
+     */
     public JugadorTenis(String nombre) {
         super(nombre);
         this.puntosTotales = 0;
+    }
+
+    /**
+     * Constructor para jugadores con puntuación de ranking inicial.
+     */
+    public JugadorTenis(String nombre, int puntosTotales) {
+        super(nombre);
+        this.puntosTotales = Math.max(0, puntosTotales); // Evita puntos negativos
     }
 
     public int getPuntosTotales() {
@@ -21,36 +32,33 @@ public class JugadorTenis extends ParticipanteAbstracto{
     }
 
     public void setPuntosTotales(int puntosTotales) {
-        this.puntosTotales = puntosTotales;
+        this.puntosTotales = Math.max(0, puntosTotales);
+    }
+
+    /**
+     * Método de utilidad para actualizar puntos tras una victoria.
+     */
+    public void añadirPuntos(int puntos) {
+        if (puntos > 0) {
+            this.puntosTotales += puntos;
+        }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof JugadorTenis that)) return false;
+        if (!super.equals(o)) return false;
+        return puntosTotales == that.puntosTotales;
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = super.hashCode();
-        result = prime * result + puntosTotales;
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (!super.equals(obj))
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        JugadorTenis other = (JugadorTenis) obj;
-        if (puntosTotales != other.puntosTotales)
-            return false;
-        return true;
+        return Objects.hash(super.hashCode(), puntosTotales);
     }
 
     @Override
     public String toString() {
-        return "JugadorTenis [puntosTotales=" + puntosTotales + "]";
+        return "Tenista: %s [%d pts]".formatted(getNombre(), puntosTotales);
     }
-
-    
-
 }

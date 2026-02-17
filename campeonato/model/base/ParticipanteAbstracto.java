@@ -1,58 +1,48 @@
 package campeonato.model.base;
+
+import java.util.Objects;
+
+/**
+ * Clase base para cualquier entidad que compita en el torneo.
+ * Se define como abstracta para evitar instancias genéricas sin especialización.
+ */
 public abstract class ParticipanteAbstracto {
 
-    private String nombre;
+    private final String nombre; // Final: el nombre no debería cambiar tras la creación
 
-    public ParticipanteAbstracto(){
-
-    }
-
-    public ParticipanteAbstracto(String nombre) {
-        this.nombre = nombre;
+    /**
+     * Constructor obligatorio. 
+     * @param nombre Nombre del participante (no puede ser nulo o vacío).
+     */
+    protected ParticipanteAbstracto(String nombre) {
+        if (nombre == null || nombre.isBlank()) {
+            throw new IllegalArgumentException("El nombre del participante no puede estar vacío.");
+        }
+        this.nombre = nombre.trim();
     }
 
     public String getNombre() {
         return nombre;
     }
 
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
+    // Eliminamos el setter de nombre para mantener la integridad de los datos del torneo
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        // Verificación de clase estricta
+        if (o == null || getClass() != o.getClass()) return false;
+        ParticipanteAbstracto that = (ParticipanteAbstracto) o;
+        return Objects.equals(nombre, that.nombre);
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((nombre == null) ? 0 : nombre.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        ParticipanteAbstracto other = (ParticipanteAbstracto) obj;
-        if (nombre == null) {
-            if (other.nombre != null)
-                return false;
-        } else if (!nombre.equals(other.nombre))
-            return false;
-        return true;
+        return Objects.hash(nombre);
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("ParticipanteAbstracto{");
-        sb.append("nombre=").append(nombre);
-        sb.append('}');
-        return sb.toString();
+        return "%s{nombre='%s'}".formatted(getClass().getSimpleName(), nombre);
     }
-
-    
-
 }

@@ -1,108 +1,82 @@
 package campeonato.model.base;
 
+import java.util.Objects;
+
+/**
+ * Representa un enfrentamiento entre dos participantes.
+ * Garantiza que el resultado sea consistente con los jugadores inscritos.
+ */
 public class Partido<T extends ParticipanteAbstracto> {
 
-    private T participante1, participante2;
+    private final T participante1;
+    private final T participante2;
     private T ganador;
     private T perdedor;
 
-    public Partido(){
-
-    }
-
+    /**
+     * Constructor principal. Un partido nace sin resultado definido.
+     */
     public Partido(T participante1, T participante2) {
-        this.participante1 = participante1;
-        this.participante2 = participante2;
+        this.participante1 = Objects.requireNonNull(participante1, "El participante 1 no puede ser nulo");
+        this.participante2 = Objects.requireNonNull(participante2, "El participante 2 no puede ser nulo");
+        
+        if (participante1.equals(participante2)) {
+            throw new IllegalArgumentException("Un participante no puede jugar contra sí mismo");
+        }
     }
 
-        public Partido(T participante1, T participante2, T ganador, T perdedor) {
-        this.participante1 = participante1;
-        this.participante2 = participante2;
-        this.ganador = ganador;
-        this.perdedor = perdedor;
-    }
-
-    public T getParticipante1() {
-        return participante1;
-    }
-
-    public void setParticipante1(T participante1) {
-        this.participante1 = participante1;
-    }
-
-    public T getParticipante2() {
-        return participante2;
-    }
-
-    public void setParticipante2(T participante2) {
-        this.participante2 = participante2;
-    }
-
-    public T getGanador() {
-        return ganador;
-    }
-
+    /**
+     * Establece el ganador del partido y actualiza automáticamente el perdedor.
+     * @param ganador Debe ser participante1 o participante2.
+     */
     public void setGanador(T ganador) {
-        this.ganador = ganador;
+        if (ganador == null) {
+            this.ganador = null;
+            this.perdedor = null;
+            return;
+        }
+
+        if (ganador.equals(participante1)) {
+            this.ganador = participante1;
+            this.perdedor = participante2;
+        } else if (ganador.equals(participante2)) {
+            this.ganador = participante2;
+            this.perdedor = participante1;
+        } else {
+            throw new IllegalArgumentException("El ganador debe ser uno de los participantes del partido.");
+        }
     }
 
-    public T getPerdedor() {
-        return perdedor;
+    // Getters
+    public T getParticipante1() { return participante1; }
+    public T getParticipante2() { return participante2; }
+    public T getGanador() { return ganador; }
+    public T getPerdedor() { return perdedor; }
+
+    /**
+     * Determina si el partido ya tiene un resultado asignado.
+     */
+    public boolean tieneGanador() {
+        return ganador != null;
     }
 
-    public void setPerdedor(T perdedor) {
-        this.perdedor = perdedor;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Partido<?> partido)) return false;
+        return Objects.equals(participante1, partido.participante1) && 
+               Objects.equals(participante2, partido.participante2) && 
+               Objects.equals(ganador, partido.ganador);
     }
 
     @Override
     public int hashCode() {
-        final int prime = 31;
-        int result = 1;
-        result = prime * result + ((participante1 == null) ? 0 : participante1.hashCode());
-        result = prime * result + ((participante2 == null) ? 0 : participante2.hashCode());
-        result = prime * result + ((ganador == null) ? 0 : ganador.hashCode());
-        result = prime * result + ((perdedor == null) ? 0 : perdedor.hashCode());
-        return result;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj)
-            return true;
-        if (obj == null)
-            return false;
-        if (getClass() != obj.getClass())
-            return false;
-        Partido other = (Partido) obj;
-        if (participante1 == null) {
-            if (other.participante1 != null)
-                return false;
-        } else if (!participante1.equals(other.participante1))
-            return false;
-        if (participante2 == null) {
-            if (other.participante2 != null)
-                return false;
-        } else if (!participante2.equals(other.participante2))
-            return false;
-        if (ganador == null) {
-            if (other.ganador != null)
-                return false;
-        } else if (!ganador.equals(other.ganador))
-            return false;
-        if (perdedor == null) {
-            if (other.perdedor != null)
-                return false;
-        } else if (!perdedor.equals(other.perdedor))
-            return false;
-        return true;
+        return Objects.hash(participante1, participante2, ganador);
     }
 
     @Override
     public String toString() {
-        return "Partido [participante1=" + participante1 + ", participante2=" + participante2 + ", ganador=" + ganador
-                + ", perdedor=" + perdedor + "]";
+        String resultado = tieneGanador() ? " -> Ganador: " + ganador.getNombre() : " (Pendiente)";
+        return "[%s vs %s]%s".formatted(participante1.getNombre(), participante2.getNombre(), resultado);
     }
-
-
-    
 }
